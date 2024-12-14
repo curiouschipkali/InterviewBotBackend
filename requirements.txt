@@ -1,0 +1,5 @@
+Flask==3.1.0
+Flask_Cors==5.0.0
+openai==1.57.4
+pymongo==4.10.1
+python-dotenv==1.0.1

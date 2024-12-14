@@ -4,16 +4,27 @@ from flask_cors import CORS
 import io
 from pymongo import MongoClient
 import config
+import os
+from dotenv import load_dotenv
 from openai import OpenAI
 import warnings
 
+load_dotenv()
+
+
+frontend_uri = os.getenv('frontend_uri')
+
+
+
+
+
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app,supports_credentials=True,  resources = {r"/*": {"origins":[frontend_uri]}})
 
 warnings.filterwarnings("ignore", category=DeprecationWarning, 
                         message="Due to a bug, this method doesn't actually stream the response content, `.with_streaming_response.method()` should be used instead")
 
-client = OpenAI(api_key=config.API_KEY)
+client = OpenAI(api_key=os.getenv("API_KEY"))
 uri = config.uri
 mongoclient = MongoClient(uri)
 db = mongoclient["Chats"]
