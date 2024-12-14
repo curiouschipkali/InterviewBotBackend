@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning,
                         message="Due to a bug, this method doesn't actually stream the response content, `.with_streaming_response.method()` should be used instead")
 
 client = OpenAI(api_key=os.getenv("API_KEY"))
-uri = config.uri
+uri = os.getenv('uri')
 mongoclient = MongoClient(uri)
 db = mongoclient["Chats"]
 chat_history = db['History']
