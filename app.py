@@ -14,8 +14,9 @@ frontend_uri = os.getenv("frontend_uri")
 print(frontend_uri)
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={
-    r"/*": {"origins": ["https://interview-bot-frontend-98j249j47-suryas-projects-1d1370cd.vercel.app"]}
+    r"/*": {"origins": [frontend_uri]}
 })
+
 
 
 warnings.filterwarnings(
@@ -32,17 +33,17 @@ db = mongoclient["Chats"]
 chat_history = db["History"]
 
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = frontend_uri
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
 
-@app.before_request
-def basic_authentication():
-    response= make_response()
-    response.headers.add("Access-Control-Allow-Origin", "")
-    response.headers.add('Access-Control-Allow-Headers', "")
-    response.headers.add('Access-Control-Allow-Methods', "*")
-    if request.method.lower() == 'options':
-        
-        return Response()
-    
+@app.route('/<path:path>', methods=['OPTIONS'])
+def options_handler(path):
+    return '', 204
+
     
     
 @app.route("/", methods=["GET", "POST"])
