@@ -48,24 +48,19 @@ def transcribe_audio():
         transcription_text = transcription.text
         print("Transcription:", transcription_text)
 
-        # Save user message to DB
         user_message = {"role": "user", "content": transcription_text}
         chat_history.insert_one(user_message)
 
-        # Fetch previous chat history
         prvs_chat = list(chat_history.find())
         for chat in prvs_chat:
             chat.pop("_id", None)
 
-        # Generate AI response
         ai_response = generate_response(transcription_text, prvs_chat)
         print("AI Response:", ai_response)
 
-        # Save assistant message to DB
         assistant_message = {"role": "assistant", "content": ai_response}
         chat_history.insert_one(assistant_message)
 
-        # Convert AI response to speech
         audio_file_response = text_to_speech(ai_response)
 
         return send_file(
