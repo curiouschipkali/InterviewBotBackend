@@ -1,23 +1,17 @@
-from pathlib import Path
-from flask import Flask, request, jsonify, send_file, render_template, make_response
+from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
-import io
 from pymongo import MongoClient
-import os
 from dotenv import load_dotenv
 from openai import OpenAI
+import io
+import os
 import warnings
 
 load_dotenv()
 
-frontend_uri = os.getenv("frontend_uri")
-print(frontend_uri)
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={
-    r"/*": {"origins": [frontend_uri]}
-})
-
-
+frontend_uri = os.getenv("frontend_uri")
+CORS(app, resources={r"/*": {"origins": frontend_uri}})
 
 warnings.filterwarnings(
     "ignore",
@@ -25,35 +19,31 @@ warnings.filterwarnings(
     message="Due to a bug, this method doesn't actually stream the response content",
 )
 
-
 client = OpenAI(api_key=os.getenv("API_KEY"))
 uri = os.getenv("uri")
 mongoclient = MongoClient(uri)
 db = mongoclient["Chats"]
 chat_history = db["History"]
 
-
 @app.after_request
 def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = frontend_uri
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return response
 
-@app.route('/<path:path>', methods=['OPTIONS'])
-def options_handler(path):
-    return '', 204
-
-    
-    
 @app.route("/", methods=["GET", "POST"])
 def hello_world():
     return "Hello, world!"
 
-@app.route("/transcribe", methods=["POST"])
+@app.route("/transcribe", methods=["POST", "OPTIONS"])
 def transcribe_audio():
+    if request.method == "OPTIONS":
+        return "", 204
     try:
-        file = request.files["audio"]
+        file = request.files.get("audio")
+        if not file:
+            return jsonify({"error": "No audio file provided"}), 400
 
         audio_file = io.BytesIO(file.read())
         audio_file.name = "audio.wav"
@@ -61,35 +51,24 @@ def transcribe_audio():
             model="whisper-1",
             file=audio_file,
         )
-
         transcription_text = transcription.text
-        print("Transcription:", transcription_text)
-
         user_message = {"role": "user", "content": transcription_text}
         chat_history.insert_one(user_message)
-
         prvs_chat = list(chat_history.find())
         for chat in prvs_chat:
             chat.pop("_id", None)
-
         ai_response = generate_response(transcription_text, prvs_chat)
-        print("AI Response:", ai_response)
-
         assistant_message = {"role": "assistant", "content": ai_response}
         chat_history.insert_one(assistant_message)
-
         audio_file_response = text_to_speech(ai_response)
-
         return send_file(
             audio_file_response,
             mimetype="audio/mp3",
             as_attachment=True,
             download_name="response.mp3",
         )
-
     except Exception as e:
         return jsonify({"error": f"Error processing audio: {str(e)}"}), 500
-
 
 def generate_response(transcription_text, prvs_chats):
     prompt = """You are an empathetic interview assistant. Your role is to conduct an interview with a user and gather information on challenges a user faces in their college or university. 
@@ -105,27 +84,20 @@ def generate_response(transcription_text, prvs_chats):
     If the input is unrelated, gently tell the user their prompt was irrelevant and guide them back to the challenges. Respond empathetically to match the user's emotions. If they joke, reply with humor. If distressed, calm them and continue.
 
     End the interview with 'thank you' if the user confirms they are done."""
-    
     messages = [
         {"role": "system", "content": "You are a helpful interviewing assistant."},
         {"role": "user", "content": prompt},
     ] + prvs_chats
-
     try:
         completion = client.chat.completions.create(
             model="gpt-4",
             messages=messages,
         )
-        assistant_response = completion.choices[0].message.content
-        return assistant_response
+        return completion.choices[0].message.content
     except Exception as e:
         raise RuntimeError(f"Error generating response: {str(e)}")
 
-
 def text_to_speech(message):
-    """
-    Convert AI-generated text to speech using OpenAI API.
-    """
     try:
         output_filename = "response.mp3"
         response = client.audio.speech.create(
@@ -137,7 +109,6 @@ def text_to_speech(message):
         return output_filename
     except Exception as e:
         raise RuntimeError(f"Error processing text-to-speech: {str(e)}")
-
 
 if __name__ == "__main__":
     app.run(debug=True)
