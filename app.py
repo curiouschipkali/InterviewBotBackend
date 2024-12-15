@@ -12,7 +12,7 @@ load_dotenv()
 
 frontend_uri = os.getenv("frontend_uri")
 print(frontend_uri)
-CORS(app,supports_credentials=True,  resources = {r"/*": {"origins":[frontend_uri]}})
+CORS(app, resources = {r"/*": {"origins":[frontend_uri]}})
 
 
 @app.before_request
