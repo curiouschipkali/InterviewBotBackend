@@ -13,7 +13,7 @@ load_dotenv()
 frontend_uri = os.getenv("frontend_uri")
 print(frontend_uri)
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": frontend_uri}})
 
 warnings.filterwarnings(
     "ignore",
