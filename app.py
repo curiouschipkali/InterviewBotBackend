@@ -10,9 +10,10 @@ import warnings
 
 load_dotenv()
 
-frontend_uri = os.getenv("frontend_uri", "http://localhost:3000")  # Default URI
+frontend_uri = os.getenv("frontend_uri")
+print(frontend_uri)
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": [frontend_uri]}})
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 
 warnings.filterwarnings(
     "ignore",
