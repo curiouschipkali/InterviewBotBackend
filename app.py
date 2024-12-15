@@ -7,6 +7,8 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 import warnings
+from io import BytesIO
+
 
 load_dotenv()
 
@@ -123,19 +125,25 @@ def generate_response(transcription_text, prvs_chats):
 
 def text_to_speech(message):
     """
-    Convert AI-generated text to speech using OpenAI API.
+    Convert AI-generated text to speech using OpenAI API and return it as a byte stream.
     """
     try:
-        output_filename = "response.mp3"
         response = client.audio.speech.create(
             model="tts-1",
             voice="alloy",
             input=message,
         )
-        response.stream_to_file(output_filename)
-        return output_filename
+        
+        audio_data = response['data'] 
+        
+        audio_stream = BytesIO(audio_data)
+        
+        audio_stream.seek(0)
+        
+        return audio_stream
     except Exception as e:
         raise RuntimeError(f"Error processing text-to-speech: {str(e)}")
+
 
 
 if __name__ == "__main__":
