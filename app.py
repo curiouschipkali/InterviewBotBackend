@@ -27,7 +27,7 @@ db = mongoclient["Chats"]
 chat_history = db["History"]
 
 
-@app.route("/transcribe", methods=["POST"])
+@app.route("/", methods=["POST"])
 def hello_world():
     return render_template("hello world")
 
