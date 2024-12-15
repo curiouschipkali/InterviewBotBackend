@@ -13,13 +13,14 @@ load_dotenv()
 frontend_uri = os.getenv("frontend_uri")
 print(frontend_uri)
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": frontend_uri}})
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": frontend_uri or "*"}})
 
 warnings.filterwarnings(
     "ignore",
     category=DeprecationWarning,
     message="Due to a bug, this method doesn't actually stream the response content",
 )
+
 
 client = OpenAI(api_key=os.getenv("API_KEY"))
 uri = os.getenv("uri")
@@ -28,6 +29,19 @@ db = mongoclient["Chats"]
 chat_history = db["History"]
 
 
+
+@app.before_request
+def basic_authentication():
+    response= make_response()
+    response.headers.add("Access-Control-Allow-Origin", "")
+    response.headers.add('Access-Control-Allow-Headers', "")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    if request.method.lower() == 'options':
+        
+        return Response()
+    
+    
+    
 @app.route("/", methods=["GET", "POST"])
 def hello_world():
     return "Hello, world!"
