@@ -126,19 +126,16 @@ def text_to_speech(message):
     Convert AI-generated text to speech using OpenAI API.
     """
     try:
+        output_filename = "response.mp3"
         response = client.audio.speech.create(
             model="tts-1",
             voice="alloy",
             input=message,
         )
-
-        # Directly return audio data instead of trying to write to a file
-        audio_data = response['audio']  # Adjust based on API response format
-        return io.BytesIO(audio_data)  # Return in-memory audio data for sending as file
-
+        response.stream_to_file(output_filename)
+        return output_filename
     except Exception as e:
         raise RuntimeError(f"Error processing text-to-speech: {str(e)}")
-
 
 
 if __name__ == "__main__":
