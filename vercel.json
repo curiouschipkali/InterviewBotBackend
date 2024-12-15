@@ -11,10 +11,6 @@
         "src": "/(.*)",
         "dest": "/app.py"
       }
-    ],
-    "env": {
-      "API_KEY": "@API_KEY", 
-      "frontend_uri": "@frontend_uri"
-    }
+    ]
   }
   
