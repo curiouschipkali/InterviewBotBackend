@@ -1,5 +1,5 @@
 from pathlib import Path
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
 import io
 from pymongo import MongoClient
@@ -26,6 +26,10 @@ mongoclient = MongoClient(uri)
 db = mongoclient["Chats"]
 chat_history = db["History"]
 
+
+@app.route("/transcribe", methods=["POST"])
+def hello_world():
+    return render_template("hello world")
 
 @app.route("/transcribe", methods=["POST"])
 def transcribe_audio():
