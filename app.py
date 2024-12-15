@@ -12,10 +12,19 @@ load_dotenv()
 
 frontend_uri = os.getenv("frontend_uri")
 print(frontend_uri)
-app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={
-    r"/*": {"origins": [frontend_uri]}
-})
+CORS(app,supports_credentials=True,  resources = {r"/*": {"origins":[frontend_uri]}})
+
+@app.before_request
+def basic_authentication():
+    response= make_response()
+    response.headers.add("Access-Control-Allow-Origin", "")
+    response.headers.add('Access-Control-Allow-Headers', "")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    if request.method.lower() == 'options':
+        
+        return Response()
+
+
 
 
 
