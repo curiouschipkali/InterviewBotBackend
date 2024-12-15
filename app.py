@@ -14,6 +14,7 @@ frontend_uri = os.getenv("frontend_uri")
 print(frontend_uri)
 CORS(app,supports_credentials=True,  resources = {r"/*": {"origins":[frontend_uri]}})
 
+
 @app.before_request
 def basic_authentication():
     response= make_response()
