@@ -1,5 +1,5 @@
 from pathlib import Path
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, send_file, render_template, make_response
 from flask_cors import CORS
 import io
 from pymongo import MongoClient
