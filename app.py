@@ -32,12 +32,11 @@ mongoclient = MongoClient(uri)
 db = mongoclient["Chats"]
 chat_history = db["History"]
 
-
 @app.after_request
 def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = frontend_uri
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Origin"] = frontend_uri or "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return response
 
 @app.route('/<path:path>', methods=['OPTIONS'])
