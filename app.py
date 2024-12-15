@@ -37,7 +37,6 @@ def transcribe_audio():
     try:
         file = request.files["audio"]
 
-        # Read the audio file
         audio_file = io.BytesIO(file.read())
         audio_file.name = "audio.wav"
         transcription = client.audio.transcriptions.create(
