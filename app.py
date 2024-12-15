@@ -13,7 +13,10 @@ load_dotenv()
 frontend_uri = os.getenv("frontend_uri")
 print(frontend_uri)
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": frontend_uri or "*"}})
+CORS(app, supports_credentials=True, resources={
+    r"/*": {"origins": ["https://interview-bot-frontend-98j249j47-suryas-projects-1d1370cd.vercel.app"]}
+})
+
 
 warnings.filterwarnings(
     "ignore",
